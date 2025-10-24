@@ -2,7 +2,15 @@
 
 **You already have Oraclez built? Perfect! Here's your simplified path:**
 
-## Prerequisites: Access Your Server
+## Prerequisites: Chainlink Installed
+
+**⚠️ FIRST: Make sure Chainlink is installed on your server!**
+
+If you DON'T have Chainlink installed yet, see: **`INSTALL_CHAINLINK_ON_GCP.md`**
+
+---
+
+## Access Your Server
 
 First, you need to access your GCP server where Chainlink is running.
 

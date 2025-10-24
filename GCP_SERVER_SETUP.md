@@ -2,6 +2,14 @@
 
 This guide shows you how to access your GCP server and run Chainlink/Oraclez integration scripts.
 
+## ⚠️ Prerequisites
+
+**You need to have Chainlink installed first!**
+
+If you haven't installed Chainlink on your GCP server yet, see: **`INSTALL_CHAINLINK_ON_GCP.md`**
+
+This guide assumes Chainlink is already installed and running.
+
 ## Step 1: Connect to Your GCP Server
 
 ### Option A: Using gcloud CLI (Recommended)
