@@ -2,16 +2,49 @@
 
 This is a quick start guide to connect your Chainlink node to the Oraclez YouTube Stats external adapter.
 
+## 🚀 Choose Your Path
+
+### ✅ Already Have Oraclez Built? (Skip to Connection)
+
+**If you already have Oraclez running, skip to Step 3 below!**
+
+**First, SSH into your GCP server where Chainlink is running:**
+```bash
+# Connect to your GCP instance
+gcloud compute ssh YOUR_INSTANCE_NAME --zone=YOUR_ZONE
+
+# Navigate to your Chainlink directory
+cd /path/to/chainlink  # Replace with your actual path
+```
+
+**Then run these commands on your server:**
+1. Test your Oraclez connection: `./examples/test_oraclez_connection.sh`
+2. Create the bridge in Chainlink: `./scripts/setup_oraclez_bridge.sh`
+3. Create jobs that use the bridge
+
+**[Jump to Step 3: Create Bridge in Chainlink](#3-create-bridge-in-chainlink)**
+
+---
+
+### 🆕 Need to Install Oraclez? (Start Here)
+
+Follow steps 1-5 below if you need to set up Oraclez from scratch.
+
+---
+
 ## Overview
 
 Oraclez is an external adapter that fetches YouTube video statistics (views and likes). This guide will help you:
-1. Set up the Oraclez server
+1. Set up the Oraclez server (if needed)
 2. Connect it to your Chainlink node
 3. Create jobs to fetch YouTube stats
 
 ## Prerequisites
 
+**For everyone:**
 - A running Chainlink node
+
+**Only if installing Oraclez (Steps 1-2):**
 - Node.js installed on your server (for Oraclez)
 - YouTube Data API v3 key
 - Supabase account
@@ -19,6 +52,8 @@ Oraclez is an external adapter that fetches YouTube video statistics (views and 
 ## Step-by-Step Setup
 
 ### 1. Deploy Oraclez on Your Server
+
+**⚠️ SKIP THIS STEP if you already have Oraclez built and running!**
 
 ```bash
 # Clone the Oraclez repository
@@ -54,6 +89,8 @@ curl http://localhost:8080
 
 ### 2. Set Up Supabase Database
 
+**⚠️ SKIP THIS STEP if you already have Oraclez configured!**
+
 In your Supabase project, run this SQL:
 
 ```sql
@@ -67,6 +104,10 @@ CREATE TABLE adapter_state (
 ```
 
 ### 3. Create Bridge in Chainlink
+
+**✅ START HERE if you already have Oraclez running!**
+
+This step connects your Chainlink node to your Oraclez server (whether you just built it or already had it).
 
 #### Option A: Automated Setup (Recommended)
 
