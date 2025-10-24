@@ -10,13 +10,18 @@ Repository: https://github.com/DiamondzShadow/Oraclez
 
 ## Prerequisites
 
+**Required:**
 1. Oraclez adapter running on a server (accessible via HTTP/HTTPS)
 2. Running Chainlink node with API access
 3. Chainlink node admin credentials
 
+**Note:** If you already have Oraclez built and running, skip directly to [Step 2: Create Bridge in Chainlink Node](#2-create-bridge-in-chainlink-node).
+
 ## Setup Steps
 
 ### 1. Deploy Oraclez Adapter
+
+**⚠️ SKIP THIS STEP if you already have Oraclez running!**
 
 First, ensure the Oraclez adapter is running on your server:
 
