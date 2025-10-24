@@ -2,6 +2,34 @@
 
 **You already have Oraclez built? Perfect! Here's your simplified path:**
 
+## Prerequisites: Access Your Server
+
+First, you need to access your GCP server where Chainlink is running.
+
+### Connect to Your GCP Server:
+
+```bash
+# SSH into your GCP instance (replace with your details)
+gcloud compute ssh YOUR_INSTANCE_NAME --zone=YOUR_ZONE
+
+# OR if using standard SSH:
+ssh -i ~/.ssh/your_key YOUR_USERNAME@YOUR_GCP_IP
+```
+
+### Navigate to Your Chainlink Workspace:
+
+```bash
+# Go to where you cloned the Chainlink repo
+cd /path/to/chainlink
+
+# If you don't know where it is:
+find ~ -name "chainlink" -type d 2>/dev/null | grep -v node_modules
+```
+
+**Once you're SSH'd into your server and in the Chainlink directory, proceed with the steps below.**
+
+---
+
 ## Your 3-Step Setup
 
 ### Step 1: Test Your Oraclez Connection

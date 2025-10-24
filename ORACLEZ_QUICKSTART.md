@@ -8,7 +8,16 @@ This is a quick start guide to connect your Chainlink node to the Oraclez YouTub
 
 **If you already have Oraclez running, skip to Step 3 below!**
 
-You only need to:
+**First, SSH into your GCP server where Chainlink is running:**
+```bash
+# Connect to your GCP instance
+gcloud compute ssh YOUR_INSTANCE_NAME --zone=YOUR_ZONE
+
+# Navigate to your Chainlink directory
+cd /path/to/chainlink  # Replace with your actual path
+```
+
+**Then run these commands on your server:**
 1. Test your Oraclez connection: `./examples/test_oraclez_connection.sh`
 2. Create the bridge in Chainlink: `./scripts/setup_oraclez_bridge.sh`
 3. Create jobs that use the bridge
