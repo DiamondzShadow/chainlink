@@ -1,0 +1,177 @@
+# Oraclez YouTube Stats Job Specifications
+# 
+# These are example job specifications for integrating with the Oraclez external adapter.
+# Copy and modify as needed for your specific use case.
+#
+# IMPORTANT: Replace the following placeholders:
+#   - YOUR_ORACLE_CONTRACT_ADDRESS: Your deployed Oracle contract address
+#   - oraclez: Your bridge name (if different)
+
+# ============================================================================
+# Job 1: YouTube Video Views Counter
+# ============================================================================
+# This job fetches YouTube video view counts via the Oraclez adapter.
+# It triggers based on configured thresholds (525 initial, then every 5 views).
+
+type = "directrequest"
+schemaVersion = 1
+name = "YouTube Views Counter - Oraclez"
+maxTaskDuration = "0s"
+contractAddress = "YOUR_ORACLE_CONTRACT_ADDRESS"
+minIncomingConfirmations = 0
+observationSource = """
+    decode_log   [type="ethabidecodelog"
+                  abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
+                  data="$(jobRun.logData)"
+                  topics="$(jobRun.logTopics)"]
+
+    decode_cbor  [type="cborparse" data="$(decode_log.data)"]
+    
+    fetch        [type="bridge"
+                  name="oraclez"
+                  requestData="{\\"id\\": $(jobSpec.externalJobID), \\"data\\": {\\"videoId\\": $(decode_cbor.videoId), \\"endpoint\\": \\"views\\"}}"]
+    
+    parse        [type="jsonparse" path="data,value" data="$(fetch)"]
+    
+    encode_data  [type="ethabiencode"
+                  abi="(uint256 value)"
+                  data="{\\"value\\": $(parse)}"]
+    
+    encode_tx    [type="ethabiencode"
+                  abi="fulfillOracleRequest(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes32 data)"
+                  data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\": $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_data)}"]
+
+    submit_tx    [type="ethtx" to="YOUR_ORACLE_CONTRACT_ADDRESS" data="$(encode_tx)"]
+
+    decode_log -> decode_cbor -> fetch -> parse -> encode_data -> encode_tx -> submit_tx
+"""
+
+# ============================================================================
+# Job 2: YouTube Video Likes Counter
+# ============================================================================
+# This job fetches YouTube video like counts via the Oraclez adapter.
+# It triggers at every 25-like milestone (25, 50, 75, 100, etc.).
+
+[[spec]]
+type = "directrequest"
+schemaVersion = 1
+name = "YouTube Likes Counter - Oraclez"
+maxTaskDuration = "0s"
+contractAddress = "YOUR_ORACLE_CONTRACT_ADDRESS"
+minIncomingConfirmations = 0
+observationSource = """
+    decode_log   [type="ethabidecodelog"
+                  abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
+                  data="$(jobRun.logData)"
+                  topics="$(jobRun.logTopics)"]
+
+    decode_cbor  [type="cborparse" data="$(decode_log.data)"]
+    
+    fetch        [type="bridge"
+                  name="oraclez"
+                  requestData="{\\"id\\": $(jobSpec.externalJobID), \\"data\\": {\\"videoId\\": $(decode_cbor.videoId), \\"endpoint\\": \\"likes\\"}}"]
+    
+    parse        [type="jsonparse" path="data,value" data="$(fetch)"]
+    
+    encode_data  [type="ethabiencode"
+                  abi="(uint256 value)"
+                  data="{\\"value\\": $(parse)}"]
+    
+    encode_tx    [type="ethabiencode"
+                  abi="fulfillOracleRequest(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes32 data)"
+                  data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\": $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_data)}"]
+
+    submit_tx    [type="ethtx" to="YOUR_ORACLE_CONTRACT_ADDRESS" data="$(encode_tx)"]
+
+    decode_log -> decode_cbor -> fetch -> parse -> encode_data -> encode_tx -> submit_tx
+"""
+
+# ============================================================================
+# Job 3: Webhook Job (Alternative approach)
+# ============================================================================
+# This is an alternative webhook-based job that can be triggered externally.
+# Useful for testing or manual triggering of the Oraclez adapter.
+
+[[spec]]
+type = "webhook"
+schemaVersion = 1
+name = "YouTube Stats Webhook - Oraclez"
+externalJobID = "00000000-0000-0000-0000-000000000003"
+observationSource = """
+    fetch        [type="bridge"
+                  name="oraclez"
+                  requestData="{\\"id\\": $(jobSpec.externalJobID), \\"data\\": {\\"videoId\\": \\"$(jobRun.requestBody.videoId)\\", \\"endpoint\\": \\"$(jobRun.requestBody.endpoint)\\"}}"]
+    
+    parse        [type="jsonparse" path="data,value" data="$(fetch)"]
+    
+    fetch -> parse
+"""
+
+# ============================================================================
+# Job 4: Cron Job for Periodic YouTube Stats Updates
+# ============================================================================
+# This job runs on a schedule to periodically check YouTube stats.
+# Adjust the schedule as needed (this example runs every 5 minutes).
+
+[[spec]]
+type = "cron"
+schemaVersion = 1
+name = "YouTube Stats Periodic Update - Oraclez"
+schedule = "CRON_TZ=UTC */5 * * * *"
+observationSource = """
+    fetch_views  [type="bridge"
+                  name="oraclez"
+                  requestData="{\\"id\\": $(jobSpec.externalJobID), \\"data\\": {\\"videoId\\": \\"YOUR_DEFAULT_VIDEO_ID\\", \\"endpoint\\": \\"views\\"}}"]
+    
+    parse_views  [type="jsonparse" path="data,value" data="$(fetch_views)"]
+    
+    fetch_likes  [type="bridge"
+                  name="oraclez"
+                  requestData="{\\"id\\": $(jobSpec.externalJobID), \\"data\\": {\\"videoId\\": \\"YOUR_DEFAULT_VIDEO_ID\\", \\"endpoint\\": \\"likes\\"}}"]
+    
+    parse_likes  [type="jsonparse" path="data,value" data="$(fetch_likes)"]
+    
+    fetch_views -> parse_views
+    fetch_likes -> parse_likes
+"""
+
+# ============================================================================
+# Notes:
+# ============================================================================
+#
+# 1. Bridge Name: Ensure "oraclez" matches your bridge name created in Chainlink
+#
+# 2. Video ID: The videoId parameter should be passed from:
+#    - Smart contract (for directrequest jobs)
+#    - Request body (for webhook jobs)
+#    - Hardcoded (for cron jobs, replace YOUR_DEFAULT_VIDEO_ID)
+#
+# 3. Endpoints: Oraclez supports two endpoints:
+#    - "views": Returns video view count
+#    - "likes": Returns video like count
+#
+# 4. Response Format: Oraclez returns data in this format:
+#    {
+#      "jobRunID": "...",
+#      "data": {
+#        "value": 1234,
+#        "views": 1234,
+#        "likes": 56,
+#        "shouldTrigger": true
+#      },
+#      "result": 1234,
+#      "statusCode": 200
+#    }
+#
+# 5. Creating Jobs: Use one of these methods:
+#    - Chainlink UI: Go to Jobs → New Job and paste the specification
+#    - CLI: chainlink jobs create -f job_spec.toml
+#    - API: POST to /v2/jobs with the job specification
+#
+# 6. Testing: After creating the job, test it by:
+#    - Triggering from a smart contract (for directrequest)
+#    - Making a POST request to the webhook endpoint (for webhook)
+#    - Waiting for the cron schedule (for cron jobs)
+#
+# 7. Monitoring: Check job runs in Chainlink UI under Jobs → [Job Name] → Runs
+#
